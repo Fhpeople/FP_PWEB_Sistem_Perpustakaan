@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 30 Nov 2025 pada 02.57
--- Versi server: 10.4.32-MariaDB
--- Versi PHP: 8.0.30
+-- Generation Time: Dec 03, 2025 at 01:30 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -24,7 +24,7 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `booking_buku`
+-- Table structure for table `booking_buku`
 --
 
 CREATE TABLE `booking_buku` (
@@ -33,13 +33,21 @@ CREATE TABLE `booking_buku` (
   `id_buku` int(11) DEFAULT NULL,
   `tanggal_booking` datetime DEFAULT NULL,
   `batas_booking` datetime DEFAULT NULL,
-  `status_booking` enum('masa booking','dibatalkan','buku dipinjam','lewat masa booking') DEFAULT NULL
+  `status_booking` enum('masa booking','dibatalkan','buku dipinjam','lewat masa booking') DEFAULT NULL,
+  `status_tampil` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `booking_buku`
+--
+
+INSERT INTO `booking_buku` (`id_booking`, `id_pengguna`, `id_buku`, `tanggal_booking`, `batas_booking`, `status_booking`, `status_tampil`) VALUES
+(48, 4, 4, '2025-12-03 00:00:00', '2025-12-05 00:00:00', 'dibatalkan', 1);
 
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `buku`
+-- Table structure for table `buku`
 --
 
 CREATE TABLE `buku` (
@@ -55,16 +63,20 @@ CREATE TABLE `buku` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data untuk tabel `buku`
+-- Dumping data for table `buku`
 --
 
 INSERT INTO `buku` (`id_buku`, `id_kategori`, `judul`, `penulis`, `penerbit`, `tahun_terbit`, `deskripsi`, `status_buku`, `cover`) VALUES
-(2, 2, 'Laut Bercerita', 'Leila S. Chudori', 'Gramedia', 2017, 'Novel yang berlatarkan Indonesia di tahun 1998.', 'tersedia', 'lautberceritacover.jpg');
+(3, 5, 'Matahari', 'Tere Liye', 'Gramedia', 2016, 'Novel ini melanjutkan kisah petualangan Raib, Seli, dan Ali, yang biasanya melibatkan perjalanan antar-dimensi, pertempuran melawan makhluk atau kekuatan jahat, dan penggunaan kemampuan spesial (seperti menghilang, pengendalian petir, dan kecerdasan luar biasa).', 'tersedia', 'SINOPSIS dan RESENSI Novel MATAHARI Karya TERE LIYE.jpg'),
+(4, 6, 'Alpha Girls Guide', 'Henry Manampiring ', 'Gramedia', 2015, 'The Alpha Girl’s Guide juga berisi wawancara inspiratif dengan dua Alpha Female Indonesia dari dua generasi: Najwa Shihab dan Alanda Kariza', 'tersedia', '[SE046] The Alpha Girl s Guide (Henry Manampiring)_pdf.jpg'),
+(5, 6, 'Atomic Habits', 'James Clear', 'Gramedia', 2018, 'Buku ini berfokus pada perubahan kebiasaan melalui langkah-langkah kecil yang konsisten, seperti menyusun ulang sistem untuk membentuk kebiasaan yang baik dan menghilangkan kebiasaan buruk. Clear menjelaskan bagaimana perubahan kecil dapat menghasilkan efek yang luar biasa dalam jangka panjang melalui empat hukum perubahan perilaku. ', 'tersedia', 'Books 📚 (@bookpill) on X.jpg'),
+(6, 2, 'Bumi Manusia', 'Pramoedya Ananta Toer', 'Hasta Mitra', 1980, 'Novel ini berlatar akhir abad ke-19 dan menggambarkan kehidupan seorang siswa HBS bernama Minke', 'tersedia', 'Bumi manusia_ Roman terbaik Indonesia_.jpg'),
+(7, 2, 'Laut Bercerita', 'Leila S Chudor', 'Gramedia', 2017, 'novel historical fiction yang berlatar belakang kisah kelam masa Orde Baru terkait penghilangan paksa aktivis', 'tersedia', 'Laut Bercerita _ Leila S_ Chudori ₊⊹.jpg');
 
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `kategori_buku`
+-- Table structure for table `kategori_buku`
 --
 
 CREATE TABLE `kategori_buku` (
@@ -73,18 +85,20 @@ CREATE TABLE `kategori_buku` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data untuk tabel `kategori_buku`
+-- Dumping data for table `kategori_buku`
 --
 
 INSERT INTO `kategori_buku` (`id_kategori`, `kategori`) VALUES
 (2, 'Sastra'),
 (3, 'Sejarah'),
-(4, 'Teknologi');
+(4, 'Teknologi'),
+(5, 'Fantasi'),
+(6, 'Motivasi');
 
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `pengguna`
+-- Table structure for table `pengguna`
 --
 
 CREATE TABLE `pengguna` (
@@ -98,7 +112,7 @@ CREATE TABLE `pengguna` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data untuk tabel `pengguna`
+-- Dumping data for table `pengguna`
 --
 
 INSERT INTO `pengguna` (`id_pengguna`, `nama`, `password`, `email`, `no_telp`, `alamat`, `status_pengguna`) VALUES
@@ -108,7 +122,7 @@ INSERT INTO `pengguna` (`id_pengguna`, `nama`, `password`, `email`, `no_telp`, `
 -- --------------------------------------------------------
 
 --
--- Struktur dari tabel `transaksi_peminjaman`
+-- Table structure for table `transaksi_peminjaman`
 --
 
 CREATE TABLE `transaksi_peminjaman` (
@@ -117,15 +131,24 @@ CREATE TABLE `transaksi_peminjaman` (
   `id_buku` int(11) DEFAULT NULL,
   `tanggal_peminjaman` date DEFAULT NULL,
   `tanggal_pengembalian` date DEFAULT NULL,
-  `status_peminjaman` enum('dipinjam','dikembalikan') DEFAULT NULL
+  `status_peminjaman` enum('dipinjam','dikembalikan') DEFAULT NULL,
+  `status_tampil` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `transaksi_peminjaman`
+--
+
+INSERT INTO `transaksi_peminjaman` (`id_peminjaman`, `id_pengguna`, `id_buku`, `tanggal_peminjaman`, `tanggal_pengembalian`, `status_peminjaman`, `status_tampil`) VALUES
+(23, 4, 3, '2025-12-03', '2025-12-03', 'dikembalikan', 1),
+(24, 4, 4, '2025-12-03', '2025-12-03', 'dikembalikan', 1);
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indeks untuk tabel `booking_buku`
+-- Indexes for table `booking_buku`
 --
 ALTER TABLE `booking_buku`
   ADD PRIMARY KEY (`id_booking`),
@@ -133,26 +156,26 @@ ALTER TABLE `booking_buku`
   ADD KEY `id_buku` (`id_buku`);
 
 --
--- Indeks untuk tabel `buku`
+-- Indexes for table `buku`
 --
 ALTER TABLE `buku`
   ADD PRIMARY KEY (`id_buku`),
   ADD KEY `id_kategori` (`id_kategori`);
 
 --
--- Indeks untuk tabel `kategori_buku`
+-- Indexes for table `kategori_buku`
 --
 ALTER TABLE `kategori_buku`
   ADD PRIMARY KEY (`id_kategori`);
 
 --
--- Indeks untuk tabel `pengguna`
+-- Indexes for table `pengguna`
 --
 ALTER TABLE `pengguna`
   ADD PRIMARY KEY (`id_pengguna`);
 
 --
--- Indeks untuk tabel `transaksi_peminjaman`
+-- Indexes for table `transaksi_peminjaman`
 --
 ALTER TABLE `transaksi_peminjaman`
   ADD PRIMARY KEY (`id_peminjaman`),
@@ -160,58 +183,58 @@ ALTER TABLE `transaksi_peminjaman`
   ADD KEY `id_buku` (`id_buku`);
 
 --
--- AUTO_INCREMENT untuk tabel yang dibuang
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT untuk tabel `booking_buku`
+-- AUTO_INCREMENT for table `booking_buku`
 --
 ALTER TABLE `booking_buku`
-  MODIFY `id_booking` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_booking` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
 
 --
--- AUTO_INCREMENT untuk tabel `buku`
+-- AUTO_INCREMENT for table `buku`
 --
 ALTER TABLE `buku`
-  MODIFY `id_buku` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_buku` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT untuk tabel `kategori_buku`
+-- AUTO_INCREMENT for table `kategori_buku`
 --
 ALTER TABLE `kategori_buku`
-  MODIFY `id_kategori` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_kategori` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT untuk tabel `pengguna`
+-- AUTO_INCREMENT for table `pengguna`
 --
 ALTER TABLE `pengguna`
   MODIFY `id_pengguna` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT untuk tabel `transaksi_peminjaman`
+-- AUTO_INCREMENT for table `transaksi_peminjaman`
 --
 ALTER TABLE `transaksi_peminjaman`
-  MODIFY `id_peminjaman` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_peminjaman` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
--- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
+-- Constraints for dumped tables
 --
 
 --
--- Ketidakleluasaan untuk tabel `booking_buku`
+-- Constraints for table `booking_buku`
 --
 ALTER TABLE `booking_buku`
   ADD CONSTRAINT `booking_buku_ibfk_1` FOREIGN KEY (`id_pengguna`) REFERENCES `pengguna` (`id_pengguna`),
   ADD CONSTRAINT `booking_buku_ibfk_2` FOREIGN KEY (`id_buku`) REFERENCES `buku` (`id_buku`);
 
 --
--- Ketidakleluasaan untuk tabel `buku`
+-- Constraints for table `buku`
 --
 ALTER TABLE `buku`
   ADD CONSTRAINT `buku_ibfk_1` FOREIGN KEY (`id_kategori`) REFERENCES `kategori_buku` (`id_kategori`);
 
 --
--- Ketidakleluasaan untuk tabel `transaksi_peminjaman`
+-- Constraints for table `transaksi_peminjaman`
 --
 ALTER TABLE `transaksi_peminjaman`
   ADD CONSTRAINT `transaksi_peminjaman_ibfk_1` FOREIGN KEY (`id_pengguna`) REFERENCES `pengguna` (`id_pengguna`),
