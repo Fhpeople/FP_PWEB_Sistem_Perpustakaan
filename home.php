@@ -17,7 +17,7 @@ if ($_SESSION['pengguna']['status_pengguna'] == 'anggota') {
                                     ?>
                                     Total Koleksi Buku</div>
                                     <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
+    
                                         <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                     </div>
                                 </div>
@@ -30,7 +30,6 @@ if ($_SESSION['pengguna']['status_pengguna'] == 'anggota') {
                                     ?>
                                     Total Anggota Aktif</div>
                                     <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
                                         <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                     </div>
                                 </div>
@@ -41,9 +40,8 @@ if ($_SESSION['pengguna']['status_pengguna'] == 'anggota') {
                                     <?php
                                         echo mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM transaksi_peminjaman"));
                                     ?>    
-                                    Jumlah Buku Dipinjam</div>
+                                    Jumlah Peminjaman Dilakukan</div>
                                     <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
                                         <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                     </div>
                                 </div>
@@ -54,9 +52,8 @@ if ($_SESSION['pengguna']['status_pengguna'] == 'anggota') {
                                     <?php
                                         echo mysqli_num_rows(mysqli_query($koneksi, "SELECT * FROM booking_buku"));
                                     ?>    
-                                    Jumlah Buku Dibooking</div>
+                                    Jumlah Booking Dilakukan</div>
                                     <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
                                         <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                                     </div>
                                 </div>
