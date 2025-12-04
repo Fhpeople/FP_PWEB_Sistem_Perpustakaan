@@ -1,29 +1,21 @@
 <?php
 
-// PROSES KONFIRMASI PENGEMBALIAN (hanya untuk admin)
-// Mengecek apakah ada permintaan pengembalian dari admin melalui URL
 if (isset($_GET['kembalikan']) && isset($_SESSION['pengguna']['status_pengguna']) && $_SESSION['pengguna']['status_pengguna'] == 'admin') {
-    // Mengambil ID peminjaman dari URL dan mengisi tanggal pengembalian dengan tanggal hari ini
     $id_peminjaman = mysqli_real_escape_string($koneksi, $_GET['kembalikan']);
     $tanggal_pengembalian = date('Y-m-d');
     
-    // Ambil data peminjaman
     $query_get_pinjam = "SELECT id_buku, id_pengguna FROM transaksi_peminjaman WHERE id_peminjaman = '$id_peminjaman'";
     $result_get_pinjam = mysqli_query($koneksi, $query_get_pinjam);
     
-    // Mengubah status peminjaman menjadi dikembalikan dan mengisi tanggal pengembalian
     $query_update = "UPDATE transaksi_peminjaman 
                      SET tanggal_pengembalian = '$tanggal_pengembalian', 
                          status_peminjaman = 'dikembalikan' 
                      WHERE id_peminjaman = '$id_peminjaman'";
     
-    // Mengecek apakah proses konfirmasi pengembalian berhasil disimpan ke database
     if (mysqli_query($koneksi, $query_update)) {
-        // Update status buku menjadi tersedia
         if ($result_get_pinjam && mysqli_num_rows($result_get_pinjam) > 0) {
             $pinjam_data = mysqli_fetch_assoc($result_get_pinjam);
             
-            // CEK apakah ada booking/peminjaman aktif lain sebelum update jadi tersedia
             $query_cek_aktif = "SELECT COUNT(*) as total FROM (
                                     SELECT id_buku FROM booking_buku 
                                     WHERE id_buku = '" . $pinjam_data['id_buku'] . "' 
@@ -34,17 +26,14 @@ if (isset($_GET['kembalikan']) && isset($_SESSION['pengguna']['status_pengguna']
                                     AND status_peminjaman = 'dipinjam'
                                     AND id_peminjaman != '$id_peminjaman'
                                 ) as aktif";
-            // Mengambil hasil pengecekan apakah masih ada transaksi aktif pada buku
             $result_cek = mysqli_query($koneksi, $query_cek_aktif);
             $cek_data = mysqli_fetch_assoc($result_cek);
             
-            // Hanya update jadi tersedia jika tidak ada yang aktif
             if ($cek_data['total'] == 0) {
                 $query_update_buku = "UPDATE buku SET status_buku = 'tersedia' WHERE id_buku = '" . $pinjam_data['id_buku'] . "'";
                 mysqli_query($koneksi, $query_update_buku);
             }
             
-            // Update booking yang terkait menjadi 'buku dipinjam' jika masih masa booking
             $query_update_booking = "UPDATE booking_buku 
                                     SET status_booking = 'buku dipinjam' 
                                     WHERE id_pengguna = '" . $pinjam_data['id_pengguna'] . "' 
@@ -60,41 +49,30 @@ if (isset($_GET['kembalikan']) && isset($_SESSION['pengguna']['status_pengguna']
     }
 }
 
-// PROSES DELETE (SOFT DELETE untuk anggota, HARD DELETE untuk admin)
-// Mengecek apakah ada permintaan hapus data peminjaman melalui URL
 if (isset($_GET['delete_peminjaman'])) {
-    // Mengambil ID peminjaman dan ID pengguna yang sedang login
     $id_peminjaman = mysqli_real_escape_string($koneksi, $_GET['delete_peminjaman']);
     $id_pengguna_login = isset($_SESSION['pengguna']['id_pengguna']) ? $_SESSION['pengguna']['id_pengguna'] : 0;
     
-    // Ambil data peminjaman
     $query_get = "SELECT id_buku, status_peminjaman, id_pengguna FROM transaksi_peminjaman WHERE id_peminjaman = '$id_peminjaman'";
     $result_get = mysqli_query($koneksi, $query_get);
     
-    // Mengecek apakah pengguna yang login adalah admin atau anggota
     $is_admin = isset($_SESSION['pengguna']['status_pengguna']) && $_SESSION['pengguna']['status_pengguna'] == 'admin';
     
     if ($is_admin) {
-        // ADMIN: Hard delete (benar-benar hapus dari database)
         $query_delete = "DELETE FROM transaksi_peminjaman WHERE id_peminjaman = '$id_peminjaman'";
     } else {
-        // ANGGOTA: Soft delete (hanya sembunyikan dari view anggota)
         $query_delete = "UPDATE transaksi_peminjaman 
                         SET status_tampil = 0 
                         WHERE id_peminjaman = '$id_peminjaman' 
                         AND id_pengguna = '$id_pengguna_login'
-                        AND status_peminjaman = 'dikembalikan'"; // Hanya yang sudah dikembalikan
+                        AND status_peminjaman = 'dikembalikan'";
     }
     
-    // Mengecek apakah proses penghapusan data peminjaman berhasil dilakukan
     if (mysqli_query($koneksi, $query_delete)) {
-        // Update status buku jadi tersedia lagi jika peminjaman dihapus dan masih dipinjam
-        // (Hanya untuk admin yang hard delete)
         if ($is_admin && $result_get && mysqli_num_rows($result_get) > 0) {
             $pinjam_data = mysqli_fetch_assoc($result_get);
             
             if ($pinjam_data['status_peminjaman'] == 'dipinjam') {
-                // CEK: Hanya update buku jadi tersedia jika tidak ada booking/peminjaman aktif lain
                 $query_cek_aktif = "SELECT COUNT(*) as total FROM (
                                         SELECT id_buku FROM booking_buku 
                                         WHERE id_buku = '" . $pinjam_data['id_buku'] . "' 
@@ -107,7 +85,6 @@ if (isset($_GET['delete_peminjaman'])) {
                 $result_cek = mysqli_query($koneksi, $query_cek_aktif);
                 $cek_data = mysqli_fetch_assoc($result_cek);
                 
-                // Hanya update jadi tersedia jika tidak ada yang aktif
                 if ($cek_data['total'] == 0) {
                     $query_update_book = "UPDATE buku SET status_buku = 'tersedia' WHERE id_buku = '" . $pinjam_data['id_buku'] . "'";
                     mysqli_query($koneksi, $query_update_book);
@@ -124,9 +101,7 @@ if (isset($_GET['delete_peminjaman'])) {
 
 $is_admin = isset($_SESSION['pengguna']['status_pengguna']) && $_SESSION['pengguna']['status_pengguna'] == 'admin';
 
-// Query data peminjaman berdasarkan status pengguna
 if ($is_admin) {
-    // Query untuk admin - tampilkan SEMUA peminjaman (termasuk yang di-soft delete anggota)
     $query = "SELECT tp.id_peminjaman, tp.id_pengguna, tp.id_buku, 
                      tp.tanggal_peminjaman, tp.tanggal_pengembalian, tp.status_peminjaman,
                      b.judul, b.penulis, b.penerbit,
@@ -136,7 +111,6 @@ if ($is_admin) {
               LEFT JOIN pengguna p ON tp.id_pengguna = p.id_pengguna 
               ORDER BY tp.tanggal_peminjaman DESC";
 } else {
-    // Query untuk anggota - hanya tampilkan peminjaman sendiri yang TIDAK di-soft delete
     $id_pengguna = isset($_SESSION['pengguna']['id_pengguna']) ? $_SESSION['pengguna']['id_pengguna'] : 0;
     $query = "SELECT tp.id_peminjaman, tp.id_pengguna, tp.id_buku,
                      tp.tanggal_peminjaman, tp.tanggal_pengembalian, tp.status_peminjaman,
@@ -150,7 +124,6 @@ if ($is_admin) {
 
 $result = mysqli_query($koneksi, $query);
 
-// Cek jika query gagal
 if (!$result) {
     $error_message = mysqli_error($koneksi);
 }
@@ -222,12 +195,10 @@ if (!$result) {
                                 <?php endif; ?>
                                 
                                 <?php if ($is_admin): ?>
-                                <!-- Admin: Hard Delete -->
                                 <a href="?page=peminjaman&delete_peminjaman=<?php echo $row['id_peminjaman']; ?>" 
                                    class="btn btn-danger btn-sm" 
                                    onclick="return confirm('Yakin ingin menghapus data ini?')">Hapus</a>
                                 <?php elseif ($row['status_peminjaman'] == 'dikembalikan'): ?>
-                                <!-- Anggota: Soft Delete (hanya yang sudah dikembalikan) -->
                                 <a href="?page=peminjaman&delete_peminjaman=<?php echo $row['id_peminjaman']; ?>" 
                                    class="btn btn-danger btn-sm" 
                                    onclick="return confirm('Yakin ingin menghapus riwayat ini?')">Hapus</a>

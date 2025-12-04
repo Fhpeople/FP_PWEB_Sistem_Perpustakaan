@@ -27,18 +27,26 @@
                                             if (isset($_POST['register'])) {
                                                 $nama = $_POST['nama'];
                                                 $email = $_POST['email'];
-                                                $no_telp = $_POST['no_telp'];
-                                                $alamat = $_POST['alamat'];
-                                                $status_pengguna = $_POST['status_pengguna'];
-                                                $password = md5($_POST['password']);
 
-                                                $insert = mysqli_query($koneksi, "INSERT INTO pengguna(nama,email,no_telp,alamat,password,status_pengguna) VALUES('$nama','$email','$no_telp','$alamat','$password','$status_pengguna')");
-                                                if ($insert) {
-                                                    echo '<script>alert("Selamat, register berhasil. Silakan login."); location.href="login.php"</script>';
+                                                $cek_duplicat_email = mysqli_query($koneksi, "SELECT * FROM pengguna WHERE email='$email'");
+                                                if (mysqli_num_rows($cek_duplicat_email) > 0) {
+                                                    echo '<script>alert("Tidak bisa menggunakan email karena email ini sudah digunakan.");</script>';
                                                 }
                                                 else
                                                 {
-                                                    echo '<script>alert("Register gagal. Silakan coba lagi.");</script>';
+                                                    $no_telp = $_POST['no_telp'];
+                                                    $alamat = $_POST['alamat'];
+                                                    $status_pengguna = $_POST['status_pengguna'];
+                                                    $password = md5($_POST['password']);
+
+                                                    $insert = mysqli_query($koneksi, "INSERT INTO pengguna(nama,email,no_telp,alamat,password,status_pengguna) VALUES('$nama','$email','$no_telp','$alamat','$password','$status_pengguna')");
+                                                    if ($insert) {
+                                                        echo '<script>alert("Selamat, register berhasil. Silakan login."); location.href="login.php"</script>';
+                                                    }
+                                                    else
+                                                    {
+                                                        echo '<script>alert("Register gagal. Silakan coba lagi.");</script>';
+                                                    }
                                                 }
                                             }
                                         ?>
